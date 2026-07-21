@@ -1,128 +1,89 @@
-#root {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.app {
-  text-align: center;
-}
-
-h1 {
-  margin-bottom: 1.5rem;
-}
-
-.add-form {
+.game {
+  position: fixed;
+  inset: 0;
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
+  flex-direction: column;
+  background: radial-gradient(120% 90% at 50% 0%, #2b3240 0%, #171b22 55%, #0e1116 100%);
+  color: #e8edf4;
+  overflow: hidden;
+  touch-action: none; /* stop the page from scrolling while dragging balls */
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.add-form input {
+.hud {
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem 0.5rem;
+}
+
+.stat {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: #1a1a1a;
-  color: inherit;
-  font-size: 1rem;
-}
-
-.add-form input:focus {
-  outline: none;
-  border-color: #646cff;
-}
-
-.habits-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.empty-message {
-  color: #888;
-  font-style: italic;
-}
-
-.habit-item {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: #1a1a1a;
-  border-radius: 8px;
-  border: 1px solid #333;
-  transition: all 0.2s;
+  gap: 0.15rem;
+  padding: 0.5rem 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
 }
 
-.habit-item.completed {
-  border-color: #4ade80;
-  background: rgba(74, 222, 128, 0.1);
+.stat .label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #93a0b3;
 }
 
-.habit-info {
+.stat .value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat.combo.hot {
+  border-color: #f59e0b;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.35);
+}
+
+.stat.combo.hot .value {
+  color: #fbbf24;
+}
+
+.stage {
+  flex: 1;
+  width: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.controls {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 1rem max(0.75rem, env(safe-area-inset-bottom));
 }
 
-.habit-name {
-  font-weight: 500;
-  font-size: 1.1rem;
-}
-
-.streak {
+.hint {
+  margin: 0;
   font-size: 0.85rem;
-  color: #f97316;
+  color: #93a0b3;
 }
 
-.habit-actions {
-  display: flex;
-  gap: 0.5rem;
+.reset {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e8edf4;
+  padding: 0.55rem 1.1rem;
+  border-radius: 10px;
+  font-weight: 600;
 }
 
-.complete-btn {
-  background: #333;
-  color: #fff;
-}
-
-.complete-btn:hover {
-  background: #444;
-}
-
-.complete-btn.done {
-  background: #4ade80;
-  color: #000;
-}
-
-.complete-btn.done:hover {
-  background: #22c55e;
-}
-
-.delete-btn {
-  background: transparent;
-  color: #ef4444;
-  border: 1px solid #ef4444;
-}
-
-.delete-btn:hover {
-  background: rgba(239, 68, 68, 0.1);
-}
-
-@media (prefers-color-scheme: light) {
-  .add-form input {
-    background: #fff;
-    border-color: #ddd;
-  }
-
-  .habit-item {
-    background: #fff;
-    border-color: #ddd;
-  }
-
-  .complete-btn {
-    background: #e5e5e5;
-    color: #333;
-  }
+.reset:hover {
+  border-color: #646cff;
 }

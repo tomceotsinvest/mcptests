@@ -1,16 +1,36 @@
-# React + Vite
+# Newton's Cradle
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple, mobile-friendly Newton's cradle game built with React + Vite and an
+HTML canvas. Pull a ball aside, release it, and watch momentum ripple through
+the chain with satisfying clacks.
 
-Currently, two official plugins are available:
+## Play
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Drag** any ball aside and let go — works with both touch and mouse.
+- Each collision is a **clack** and scores a point.
+- Chain clacks quickly to build a **combo** multiplier.
+- Your **best** score is saved locally on the device.
 
-## React Compiler
+## How it works
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Each ball is simulated as an independent pendulum (gravity + light damping).
+Neighbouring bobs resolve as equal-mass elastic collisions, so hitting one end
+sends a single ball flying off the other — the real Newton's cradle effect.
+Collisions also drive short Web Audio "clack" tones whose pitch and volume
+scale with impact speed.
 
-## Expanding the ESLint configuration
+The stage is a full-viewport, responsive `<canvas>` that adapts to any phone
+size and orientation, with `touch-action: none` so dragging never scrolls the
+page.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Develop
+
+```bash
+npm install
+npm run dev      # start the dev server
+npm run build    # production build
+npm run lint     # eslint
+```
+
+Game logic and rendering live in [`src/App.jsx`](src/App.jsx); styling is in
+[`src/App.css`](src/App.css).
