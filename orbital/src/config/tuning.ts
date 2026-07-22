@@ -30,8 +30,9 @@ export const TUNING = {
   PERFECT_CONE_DEG: 14,
   PERFECT_BONUS_DUST: 5,
 
-  // ---- ambient ----
-  AMBIENT_GRAVITY_FACTOR: 0.0,
+  // ---- ambient / fall ----
+  AMBIENT_GRAVITY_FACTOR: 0.0, // weak pull from the nearest planet in free-flight
+  FALL_G: 280, // px/s^2 constant downward pull in free-flight ("always falling")
   CLOUD_DRAG: 0.86,
 
   // ---- combo / score ----

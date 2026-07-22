@@ -191,7 +191,9 @@ function clampX(w: World, x: number): number {
  * runs an explicit reachability check at the current world speed.
  */
 function seedStarterField(w: World): void {
-  let y = -300; // first planet above the ship
+  // First planet sits close so the opening climb reaches it before the ship
+  // stalls under gravity; the rest chain within a reachable cone above.
+  let y = -190;
   let lastX = 0;
   for (let i = 0; i < 7; i++) {
     const p = w.planets.obtain();

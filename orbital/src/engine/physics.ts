@@ -114,6 +114,10 @@ export function releaseShip(ship: Ship): void {
  * for readability. The ship coasts; only optional ambient gravity bends it.
  */
 export function stepFlight(ship: Ship, dt: number, nearest: Planet | null): void {
+  // "always falling": a constant downward pull so idling drops you into the
+  // kill-line — the only way to gain height is to slingshot off a planet.
+  ship.vy += T.FALL_G * dt;
+
   if (T.AMBIENT_GRAVITY_FACTOR > 0 && nearest) {
     const dx = nearest.x - ship.x;
     const dy = nearest.y - ship.y;
