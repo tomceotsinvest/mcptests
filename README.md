@@ -1,3 +1,20 @@
+# RNG Shooter
+
+A top-down infinite-wave shooter where every kill rolls random loot. Open
+[`rng-shooter/index.html`](rng-shooter/index.html) directly in a browser — no build step or dependencies.
+
+- **RNG loot loop** — every enemy kill drops a random weapon; 10% of the time it rolls an ability instead
+- **Loadout** — hold up to 2 weapons (swap with `Q` / scroll) and 1 ability (`SPACE`)
+- **12 unique weapons** across 5 rarities (Common → Legendary): Pistol, SMG, Shotgun, Burst Rifle, Assault Rifle, Dual Uzis, Sniper Rifle, Flamethrower, Rocket Launcher, Laser Repeater, Minigun, Railgun
+- **6 abilities** — Dash, Nuke, Time Freeze, Med Kit, Shield, Auto Turret
+- **7 enemy types** — grunt, shooter, bomber, tank, charger, sniper, splitter (splits into minis)
+- **Infinite waves** with random spawn positions and scaling difficulty
+- **2 maps** — Forest (trees, grass, flowers) and Mars (red dunes, rocks, craters)
+
+Controls: `WASD` move · mouse aim/shoot · `F` pick up loot · `Q`/scroll swap weapon · `SPACE` use ability
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
