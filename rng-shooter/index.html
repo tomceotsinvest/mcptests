@@ -113,6 +113,239 @@ const ENEMY_TYPES = {
 };
 
 // ------------------------------------------------------------
+// Pixel-art sprites
+// Each sprite is a pixel map ('.' = transparent) rendered once
+// to an offscreen canvas. All sprites face RIGHT; rotation is
+// applied at draw time. anchor = rotation center in pixels,
+// body = body diameter in pixels (used to match entity radius).
+// ------------------------------------------------------------
+const SPRITE_DEFS = {
+  player: {
+    anchor: [8, 7.5], body: 13,
+    palette: { K: '#1c262b', A: '#cfd8dc', S: '#78909c', V: '#4dd0e1', D: '#37474f' },
+    rows: [
+      '....................',
+      '......KKKKK.........',
+      '....KKAAAAAKK.......',
+      '...KAAAAAAAAAK......',
+      '..KAAAAASSAAAAK.....',
+      '..KAAAASVVSAAAK.....',
+      '.KAAAAASVVVSAAKDDD..',
+      '.KAAAAASVVVSAAKDDDDD',
+      '.KAAAAASVVVSAAKDDD..',
+      '..KAAAASVVSAAAK.....',
+      '..KAAAAASSAAAAK.....',
+      '...KAAAAAAAAAK......',
+      '....KKAAAAAKK.......',
+      '......KKKKK.........',
+      '....................',
+      '....................',
+    ],
+  },
+  grunt: {
+    anchor: [6.5, 6], body: 12,
+    palette: { K: '#4e1a1a', R: '#e57373', r: '#b94a4a', W: '#ffffff', P: '#1a1a1a', M: '#7f2222' },
+    rows: [
+      '.....KKKK.....',
+      '...KKRRRRKK...',
+      '..KRRRRRRRRK..',
+      '.KRRRRRRRRRRK.',
+      '.KRRWPRRWPRRK.',
+      '.KRRRRRRRRRRK.',
+      '.KRrRRRRRRrRK.',
+      '.KRRMMMMMMRRK.',
+      '.KRrRRRRRRrRK.',
+      '..KRrRRRRrRK..',
+      '...KKRRRRKK...',
+      '.....KKKK.....',
+      '..............',
+      '..............',
+    ],
+  },
+  shooter: {
+    anchor: [7.5, 5.5], body: 11,
+    palette: { K: '#23274d', B: '#7986cb', b: '#5c6bc0', W: '#ffffff', C: '#4dd0e1', D: '#37474f' },
+    rows: [
+      '..................',
+      '......KKKKK.......',
+      '....KKBBBBBKK.....',
+      '...KBBBBBBBBBK....',
+      '..KBBBBWWWWBBK....',
+      '..KBBBWWCCWWBKDDD.',
+      '..KBBBWWCCWWBKDDDD',
+      '..KBBBBWWWWBBKDDD.',
+      '...KBBBBBBBBBK....',
+      '....KKBBbbbKK.....',
+      '......KKKKK.......',
+      '..................',
+      '..................',
+      '..................',
+    ],
+  },
+  bomber: {
+    anchor: [6.5, 7], body: 10,
+    palette: { K: '#141a1e', B: '#37474f', O: '#ff9800', W: '#eceff1', F: '#8d6e63', S: '#ffeb3b' },
+    rows: [
+      '.........SS...',
+      '........FF....',
+      '......KFK.....',
+      '....KKBBBKK...',
+      '...KBBBBBBBK..',
+      '..KBBWBBBBBBK.',
+      '..KBOOOOOOBBK.',
+      '..KBOOOOOOBBK.',
+      '..KBBBBBBBBBK.',
+      '...KBBBBBBBK..',
+      '....KKBBBKK...',
+      '......KKK.....',
+      '..............',
+      '..............',
+    ],
+  },
+  tank: {
+    anchor: [8.5, 7.5], body: 15,
+    palette: { K: '#2b1a14', T: '#3e2723', B: '#8d6e63', b: '#6d4c41', N: '#d7ccc8', D: '#4e342e' },
+    rows: [
+      '......................',
+      '.KTTTTTTTTTTTTTTK.....',
+      '.KTTTTTTTTTTTTTTK.....',
+      '.KKKKKKKKKKKKKKKK.....',
+      '.KBBBBBBBBBBBBBBK.....',
+      '.KBNBBBBBBBBBBNBK.....',
+      '.KBBBBbbbbbbBBBBK.....',
+      '.KBBBbbBBBBbbBBBKDDDDD',
+      '.KBBBbbBBBBbbBBBKDDDDD',
+      '.KBBBBbbbbbbBBBBK.....',
+      '.KBNBBBBBBBBBBNBK.....',
+      '.KBBBBBBBBBBBBBBK.....',
+      '.KKKKKKKKKKKKKKKK.....',
+      '.KTTTTTTTTTTTTTTK.....',
+      '.KTTTTTTTTTTTTTTK.....',
+      '......................',
+    ],
+  },
+  charger: {
+    anchor: [6, 7], body: 12,
+    palette: { K: '#5d1030', P: '#f06292', p: '#c2185b', W: '#ffffff' },
+    rows: [
+      '................',
+      '.KK.............',
+      '.KPPKK..........',
+      '.KPPPPKK........',
+      '.KPpPPPPKK......',
+      '.KPPWPPPPPKK....',
+      '.KPPPPPPPPPPKK..',
+      '.KPpPPPPPPPPPPK.',
+      '.KPPPPPPPPPPKK..',
+      '.KPPWPPPPPKK....',
+      '.KPpPPPPKK......',
+      '.KPPPPKK........',
+      '.KPPKK..........',
+      '.KK.............',
+    ],
+  },
+  sniper: {
+    anchor: [6.5, 5.5], body: 9,
+    palette: { K: '#0d3330', T: '#4db6ac', t: '#00897b', S: '#b2ff59', D: '#263238' },
+    rows: [
+      '....................',
+      '.....KKKK...........',
+      '...KKTTTTKK.........',
+      '..KTTTTTTTTK........',
+      '..KTTTTSSTTK........',
+      '..KTTTTSSTTKDDDDDDDD',
+      '..KTTtTTTTTKDDD.....',
+      '..KTTttTTTTK........',
+      '...KKTTTTKK.........',
+      '.....KKKK...........',
+      '....................',
+      '....................',
+    ],
+  },
+  splitter: {
+    anchor: [7.5, 7], body: 14,
+    palette: { K: '#2e1a47', S: '#9575cd', s: '#7e57c2', C: '#d1c4e9', N: '#4a148c' },
+    rows: [
+      '................',
+      '....KKK..KKK....',
+      '...KSSSKKSSSK...',
+      '..KSSSSSSSSSSK..',
+      '.KSSSSSSSSSSSSK.',
+      '.KSSCCSSSSCCSSK.',
+      '.KSCNNCSSCNNCSK.',
+      '.KSSCCSSSSCCSSK.',
+      '.KSSSSSSSSSSSSK.',
+      '.KSsSSSSSSSSsSK.',
+      '..KSSSSssSSSSK..',
+      '..KSsSSSSSSsSK..',
+      '...KSSKSSKSSK...',
+      '....KK.KK.KK....',
+      '................',
+      '................',
+    ],
+  },
+  mini: {
+    anchor: [4.5, 4.5], body: 8,
+    palette: { K: '#2e1a47', S: '#b39ddb', C: '#d1c4e9', N: '#4a148c' },
+    rows: [
+      '..........',
+      '...KKKK...',
+      '..KSSSSK..',
+      '.KSSCCSSK.',
+      '.KSCNNCSK.',
+      '.KSSCCSSK.',
+      '.KSSSSSSK.',
+      '..KSSKSK..',
+      '...KK.K...',
+      '..........',
+    ],
+  },
+};
+
+function tintSprite(src, color, alpha) {
+  const c = document.createElement('canvas');
+  c.width = src.width; c.height = src.height;
+  const g = c.getContext('2d');
+  g.drawImage(src, 0, 0);
+  g.globalCompositeOperation = 'source-atop';
+  g.globalAlpha = alpha;
+  g.fillStyle = color;
+  g.fillRect(0, 0, c.width, c.height);
+  return c;
+}
+
+const SPRITES = {};
+for (const [name, def] of Object.entries(SPRITE_DEFS)) {
+  const w = def.rows[0].length, h = def.rows.length;
+  def.rows.forEach((r, i) => { if (r.length !== w) throw new Error('sprite ' + name + ' row ' + i + ': ' + r.length + ' != ' + w); });
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const g = c.getContext('2d');
+  def.rows.forEach((row, y) => {
+    for (let x = 0; x < row.length; x++) {
+      const ch = row[x];
+      if (ch !== '.') { g.fillStyle = def.palette[ch]; g.fillRect(x, y, 1, 1); }
+    }
+  });
+  SPRITES[name] = {
+    img: c, w, h, cx: def.anchor[0], cy: def.anchor[1], body: def.body,
+    flash: tintSprite(c, '#ffffff', 1), frozen: tintSprite(c, '#90caf9', 0.55),
+  };
+}
+
+function drawSprite(name, variant, x, y, angle, scale, squashY) {
+  const s = SPRITES[name];
+  const img = variant === 'flash' ? s.flash : variant === 'frozen' ? s.frozen : s.img;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(angle);
+  ctx.scale(scale, scale * (squashY || 1));
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, -s.cx, -s.cy);
+  ctx.restore();
+}
+
+// ------------------------------------------------------------
 // Maps
 // ------------------------------------------------------------
 const MAPS = {
@@ -934,38 +1167,18 @@ function renderEnemy(e) {
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(tx, ty); ctx.stroke();
   }
-  ctx.fillStyle = e.hitFlash > 0 ? '#ffffff' : (frozen ? '#90caf9' : e.color);
-  // body shapes per type
-  ctx.beginPath();
-  switch (e.type) {
-    case 'tank': ctx.rect(-e.r, -e.r, e.r * 2, e.r * 2); break;
-    case 'bomber': {
-      for (let i = 0; i < 3; i++) {
-        const a = (i / 3) * Math.PI * 2 - Math.PI / 2 + game.time * 3;
-        ctx.lineTo(Math.cos(a) * e.r, Math.sin(a) * e.r);
-      }
-      ctx.closePath(); break;
-    }
-    case 'charger': {
-      const a0 = Math.atan2(player.y - e.y, player.x - e.x);
-      ctx.moveTo(Math.cos(a0) * e.r * 1.3, Math.sin(a0) * e.r * 1.3);
-      ctx.lineTo(Math.cos(a0 + 2.5) * e.r, Math.sin(a0 + 2.5) * e.r);
-      ctx.lineTo(Math.cos(a0 - 2.5) * e.r, Math.sin(a0 - 2.5) * e.r);
-      ctx.closePath(); break;
-    }
-    case 'splitter': {
-      for (let i = 0; i < 6; i++) {
-        const a = (i / 6) * Math.PI * 2;
-        ctx.lineTo(Math.cos(a) * e.r, Math.sin(a) * e.r);
-      }
-      ctx.closePath(); break;
-    }
-    default: ctx.arc(0, 0, e.r, 0, Math.PI * 2);
+  // sprite body (drawn at origin — we're already translated to e.x, e.y)
+  const variant = e.hitFlash > 0 ? 'flash' : (frozen ? 'frozen' : 'normal');
+  const spr = SPRITES[e.type];
+  const scale = (e.r * 2 * 1.15) / spr.body;
+  if (e.type === 'splitter' || e.type === 'mini') {
+    // slimes wobble instead of rotating
+    const squash = frozen ? 1 : 1 + Math.sin(game.time * 5 + e.wander) * 0.1;
+    drawSprite(e.type, variant, 0, 0, 0, scale, squash);
+  } else {
+    const face = Math.atan2(player.y - e.y, player.x - e.x);
+    drawSprite(e.type, variant, 0, 0, face, scale);
   }
-  ctx.fill();
-  // eye/core
-  ctx.fillStyle = 'rgba(0,0,0,0.4)';
-  ctx.beginPath(); ctx.arc(0, 0, e.r * 0.35, 0, Math.PI * 2); ctx.fill();
   // hp bar
   if (e.hp < e.maxHp) {
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
@@ -986,16 +1199,17 @@ function renderPlayer() {
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(0, 0, player.r + 8, 0, Math.PI * 2); ctx.stroke();
   }
-  // body
-  ctx.fillStyle = player.hurtFlash > 0 ? '#ff8a80' : '#eceff1';
-  ctx.beginPath(); ctx.arc(0, 0, player.r, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#37474f';
-  ctx.beginPath(); ctx.arc(0, 0, player.r * 0.55, 0, Math.PI * 2); ctx.fill();
-  // gun
-  ctx.rotate(angle);
+  // sprite body (includes the rifle, drawn facing the aim direction)
+  const scale = (player.r * 2 * 1.15) / SPRITES.player.body;
+  drawSprite('player', player.hurtFlash > 0 ? 'flash' : 'normal', 0, 0, angle, scale);
+  // rarity-colored band on the gun barrel
   const w = player.weapons[player.active];
-  ctx.fillStyle = w ? RARITIES[w.rarity].color : '#999';
-  ctx.fillRect(6, -3.5, 22, 7);
+  if (w && player.hurtFlash <= 0) {
+    ctx.rotate(angle);
+    ctx.fillStyle = RARITIES[w.rarity].color;
+    ctx.fillRect((15.5 - SPRITES.player.cx) * scale, -1.6 * scale, 3.5 * scale, 3.2 * scale);
+    ctx.rotate(-angle);
+  }
   ctx.restore();
 }
 
