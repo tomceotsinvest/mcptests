@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "Orbital",
+    "slug": "orbital",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "backgroundColor": "#05060B",
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.orbital.game"
+    },
+    "android": {
+      "package": "com.orbital.game"
+    },
+    "plugins": ["expo-font"],
+    "newArchEnabled": true
+  }
+}
