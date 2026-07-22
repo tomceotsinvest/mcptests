@@ -94,6 +94,7 @@ export interface World {
   multiplier: number;
   nextPlanetId: number;
   topPlanetY: number; // most-negative y a planet currently occupies
+  topPlanetX: number; // x of the current top planet (for reachable chaining)
 
   dead: boolean;
 
@@ -137,6 +138,7 @@ export function createWorld(seed: number, vp: Viewport): World {
     multiplier: 1,
     nextPlanetId: 1,
     topPlanetY: 0,
+    topPlanetX: 0,
     dead: false,
     events: [],
     simStepsThisFrame: 0,
@@ -168,16 +170,35 @@ function primeTrail(w: World): void {
   w.trailCount = 0;
 }
 
-/** M1 starter field: a handful of planets climbing upward, roughly reachable. */
+/**
+ * Planets live inside a centred BAND so they stay on-screen given the bounded
+ * camera corridor (see `frame`). BAND + CORRIDOR must be < w/2 to stay visible.
+ */
+function bandHalf(w: World): number {
+  return w.vp.w * 0.38;
+}
+function corridorHalf(w: World): number {
+  return w.vp.w * 0.1;
+}
+function clampX(w: World, x: number): number {
+  const half = bandHalf(w);
+  return Math.max(-half, Math.min(half, x));
+}
+
+/**
+ * M1 starter field: planets climbing upward, each within a reachable cone of the
+ * previous one (a ~45° step). M2 replaces this with the chunked generator that
+ * runs an explicit reachability check at the current world speed.
+ */
 function seedStarterField(w: World): void {
-  let y = -320; // first planet above the ship
+  let y = -300; // first planet above the ship
   let lastX = 0;
-  for (let i = 0; i < 6; i++) {
+  for (let i = 0; i < 7; i++) {
     const p = w.planets.obtain();
     if (!p) break;
-    const spread = w.vp.w * 0.34;
-    // alternate sides but keep within a reachable horizontal cone.
-    const x = clampX(w, lastX + w.rng.range(-spread, spread));
+    const gap = w.rng.range(210, 260);
+    // reachable horizontal step: within ~1 gap of the last planet.
+    const x = clampX(w, lastX + w.rng.range(-gap, gap) * 0.85);
     p.x = x;
     p.y = y;
     p.r = w.rng.range(24, 52);
@@ -188,15 +209,10 @@ function seedStarterField(w: World): void {
     p.id = w.nextPlanetId++;
     scatterDustAround(w, p);
     lastX = x;
-    y -= w.rng.range(240, 300);
+    y -= gap;
   }
   w.topPlanetY = y;
-}
-
-function clampX(w: World, x: number): number {
-  const m = 40;
-  const half = w.vp.w / 2 - m;
-  return Math.max(-half, Math.min(half, x));
+  w.topPlanetX = lastX;
 }
 
 /** Sprinkle a short arc of dust near a planet so good orbits are rewarded. */
@@ -220,10 +236,11 @@ function recyclePlanets(w: World): void {
   const killY = w.camera.y + w.vp.h / 2 + T.OFFSCREEN_MARGIN + 200;
   w.planets.forEachActive((p) => {
     if (p.y > killY) {
-      // move it above the current top with a reachable horizontal offset.
-      const spread = w.vp.w * 0.34;
-      w.topPlanetY -= w.rng.range(240, 300);
-      p.x = clampX(w, p.x + w.rng.range(-spread, spread));
+      // re-spawn above the current top, within a reachable cone of it.
+      const gap = w.rng.range(210, 260);
+      w.topPlanetY -= gap;
+      w.topPlanetX = clampX(w, w.topPlanetX + w.rng.range(-gap, gap) * 0.85);
+      p.x = w.topPlanetX;
       p.y = w.topPlanetY;
       p.r = w.rng.range(24, 52);
       p.hue = w.rng.int(0, 3);
@@ -379,6 +396,11 @@ export function frame(w: World, realDt: number): void {
 
   // camera: soft-lead follow, then forced rising floor (never falls behind).
   updateCamera(w.camera, w.ship.x, w.ship.y, w.ship.vx, w.ship.vy, realDt);
+  // Clamp horizontal to a corridor so the ship lives within the screen width —
+  // fling sideways and you cross the edge and die, instead of the camera chasing
+  // you out into empty space with no planets in reach.
+  const ch = corridorHalf(w);
+  w.camera.x = Math.max(-ch, Math.min(ch, w.camera.x));
   if (!w.dead) {
     const decayed = w.forcedFloorY - w.worldSpeed * realDt;
     w.forcedFloorY = Math.min(decayed, w.camera.y);
