@@ -716,7 +716,7 @@ const player = {
   x: 0, y: 0, r: 15, hp: 100, maxHp: 100, speed: 230,
   weapons: [], active: 0, ability: null,
   fireTimer: 0, burstLeft: 0, burstTimer: 0, burstAngle: 0,
-  shieldTimer: 0, hurtFlash: 0, dead: false,
+  shieldTimer: 0, hurtFlash: 0, dead: false, regenTimer: 5,
 };
 
 let enemies = [], bullets = [], enemyBullets = [], drops = [], particles = [], turrets = [], floaters = [];
@@ -873,7 +873,7 @@ function startGame(mapKey) {
   player.hp = player.maxHp = 100;
   player.weapons = [{ ...WEAPONS[0] }]; // start with the common Pistol
   player.active = 0; player.ability = null;
-  player.shieldTimer = 0; player.dead = false;
+  player.shieldTimer = 0; player.dead = false; player.regenTimer = 5;
   enemies = []; bullets = []; enemyBullets = []; drops = []; particles = []; turrets = []; floaters = [];
   nextWave();
 }
@@ -1215,6 +1215,16 @@ function update(dt) {
   player.hurtFlash = Math.max(0, player.hurtFlash - dt);
   game.shake = Math.max(0, game.shake - dt * 30);
   if (player.ability) player.ability.timer = Math.max(0, player.ability.timer - dt);
+
+  // passive regen: +10 HP every 5 seconds
+  player.regenTimer -= dt;
+  if (player.regenTimer <= 0) {
+    player.regenTimer += 5;
+    if (player.hp < player.maxHp && !player.dead) {
+      player.hp = Math.min(player.maxHp, player.hp + 10);
+      floaters.push({ x: player.x, y: player.y - 26, text: '+10', color: '#66bb6a', life: 0.9, size: 15, vy: -45 });
+    }
+  }
 
   // player movement
   let mx = 0, my = 0;
