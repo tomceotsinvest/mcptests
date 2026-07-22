@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>RNG Shooter</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; font-family: 'Segoe UI', Arial, sans-serif; }
-  canvas { display: block; cursor: crosshair; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0a; font-family: 'Segoe UI', Arial, sans-serif; overscroll-behavior: none; }
+  canvas { display: block; cursor: crosshair; touch-action: none; -webkit-user-select: none; user-select: none; }
 </style>
 </head>
 <body>
@@ -191,6 +191,100 @@ canvas.addEventListener('mousedown', e => { mouse.down = true; handleClick(); })
 canvas.addEventListener('mouseup', () => { mouse.down = false; });
 window.addEventListener('wheel', () => { if (game.state === 'playing' && player.weapons.length > 1) swapWeapon(); });
 
+// ------------------------------------------------------------
+// Touch controls (mobile): twin-stick + buttons
+// Left half = move stick, right half = aim stick (auto-fires),
+// on-screen buttons for SWAP / ABILITY / TAKE.
+// ------------------------------------------------------------
+const touch = {
+  enabled: false,
+  move: null, // {id, bx, by, dx, dy}
+  aim: null,  // {id, bx, by, dx, dy}
+  aimAngle: 0, firing: false,
+};
+const STICK_R = 60, KNOB_R = 26;
+
+function weaponSlotRect(i) {
+  if (touch.enabled) return { x: W - 266, y: 14 + i * 48, w: 250, h: 42 };
+  return { x: 16, y: H - 118 + i * 48, w: 250, h: 42 };
+}
+
+function touchButtons() {
+  const btns = [
+    { id: 'ability', x: W - 56, y: H - 232, r: 34, label: 'ABILITY' },
+    { id: 'swap',    x: W - 176, y: H - 208, r: 28, label: 'SWAP' },
+  ];
+  if (game.state === 'playing' && nearestDrop()) btns.push({ id: 'take', x: W / 2, y: H - 130, r: 38, label: 'TAKE' });
+  return btns;
+}
+
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault();
+  touch.enabled = true;
+  for (const t of e.changedTouches) {
+    const x = t.clientX, y = t.clientY;
+    if (game.state === 'menu' || game.state === 'gameover') {
+      mouse.x = x; mouse.y = y; handleClick();
+      continue;
+    }
+    const btn = touchButtons().find(b => Math.hypot(b.x - x, b.y - y) < b.r + 14);
+    if (btn) {
+      if (btn.id === 'ability') useAbility();
+      else if (btn.id === 'swap') swapWeapon();
+      else if (btn.id === 'take') tryPickup();
+      continue;
+    }
+    // tap a weapon slot to select it
+    let slotHit = false;
+    for (let i = 0; i < 2; i++) {
+      const s = weaponSlotRect(i);
+      if (x > s.x && x < s.x + s.w && y > s.y && y < s.y + s.h) {
+        if (player.weapons[i]) player.active = i;
+        slotHit = true;
+      }
+    }
+    if (slotHit) continue;
+    if (x < W / 2 && !touch.move) touch.move = { id: t.identifier, bx: x, by: y, dx: 0, dy: 0 };
+    else if (x >= W / 2 && !touch.aim) touch.aim = { id: t.identifier, bx: x, by: y, dx: 0, dy: 0 };
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchmove', e => {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    for (const s of [touch.move, touch.aim]) {
+      if (s && s.id === t.identifier) {
+        s.dx = t.clientX - s.bx; s.dy = t.clientY - s.by;
+        const d = Math.hypot(s.dx, s.dy);
+        if (d > STICK_R) { s.dx *= STICK_R / d; s.dy *= STICK_R / d; }
+      }
+    }
+  }
+  if (touch.aim) {
+    const d = Math.hypot(touch.aim.dx, touch.aim.dy);
+    if (d > 12) { touch.aimAngle = Math.atan2(touch.aim.dy, touch.aim.dx); touch.firing = true; }
+    else touch.firing = false;
+  }
+}, { passive: false });
+
+function endTouch(e) {
+  e.preventDefault();
+  for (const t of e.changedTouches) {
+    if (touch.move && touch.move.id === t.identifier) touch.move = null;
+    if (touch.aim && touch.aim.id === t.identifier) { touch.aim = null; touch.firing = false; }
+  }
+}
+canvas.addEventListener('touchend', endTouch, { passive: false });
+canvas.addEventListener('touchcancel', endTouch, { passive: false });
+
+// Direction the player is currently aiming (touch stick or mouse)
+function currentAimAngle() {
+  if (touch.enabled && (touch.firing || !!touch.aim)) return touch.aimAngle;
+  if (touch.enabled && !mouse.down) return touch.aimAngle;
+  const wm = screenToWorld(mouse.x, mouse.y);
+  return Math.atan2(wm.y - player.y, wm.x - player.x);
+}
+
 function handleKeyPress(k) {
   if (game.state === 'menu') {
     if (k === '1') startGame('forest');
@@ -326,7 +420,14 @@ function useAbility() {
   const wm = screenToWorld(mouse.x, mouse.y);
   switch (a.id) {
     case 'dash': {
-      const ang = Math.atan2(wm.y - player.y, wm.x - player.x);
+      let ang;
+      if (touch.enabled) {
+        if (touch.aim && (touch.aim.dx || touch.aim.dy)) ang = Math.atan2(touch.aim.dy, touch.aim.dx);
+        else if (touch.move && (touch.move.dx || touch.move.dy)) ang = Math.atan2(touch.move.dy, touch.move.dx);
+        else ang = touch.aimAngle;
+      } else {
+        ang = Math.atan2(wm.y - player.y, wm.x - player.x);
+      }
       for (let i = 0; i < 12; i++) particles.push(makeParticle(player.x, player.y, a.color));
       let nx = player.x + Math.cos(ang) * 180, ny = player.y + Math.sin(ang) * 180;
       nx = clamp(nx, player.r, WORLD.w - player.r); ny = clamp(ny, player.r, WORLD.h - player.r);
@@ -388,9 +489,9 @@ function updateShooting(dt) {
       player.burstTimer = w.burstDelay || 0.07;
     }
   }
-  if (mouse.down && player.fireTimer <= 0) {
-    const wm = screenToWorld(mouse.x, mouse.y);
-    const angle = Math.atan2(wm.y - player.y, wm.x - player.x);
+  if ((mouse.down || touch.firing) && player.fireTimer <= 0) {
+    const angle = touch.firing ? touch.aimAngle
+      : Math.atan2(screenToWorld(mouse.x, mouse.y).y - player.y, screenToWorld(mouse.x, mouse.y).x - player.x);
     if (w.burst) {
       player.burstLeft = w.burst; player.burstTimer = 0; player.burstAngle = angle;
     } else {
@@ -577,8 +678,9 @@ function update(dt) {
   if (keys['s'] || keys['arrowdown']) my += 1;
   if (keys['a'] || keys['arrowleft']) mx -= 1;
   if (keys['d'] || keys['arrowright']) mx += 1;
+  if (touch.move) { mx += touch.move.dx / STICK_R; my += touch.move.dy / STICK_R; }
   if (mx || my) {
-    const l = Math.hypot(mx, my);
+    const l = Math.max(1, Math.hypot(mx, my));
     moveWithCollision(player, mx / l * player.speed * dt, my / l * player.speed * dt);
   }
 
@@ -875,8 +977,7 @@ function renderEnemy(e) {
 }
 
 function renderPlayer() {
-  const wm = screenToWorld(mouse.x, mouse.y);
-  const angle = Math.atan2(wm.y - player.y, wm.x - player.x);
+  const angle = currentAimAngle();
   ctx.save();
   ctx.translate(player.x, player.y);
   // shield
@@ -936,9 +1037,9 @@ function renderHUD() {
     ctx.fillText('TIME FROZEN ' + game.freezeTimer.toFixed(1) + 's', W / 2, 110);
   }
 
-  // weapon slots (bottom left)
+  // weapon slots (bottom left on desktop, top right on touch)
   for (let i = 0; i < 2; i++) {
-    const x = 16, y = H - 118 + i * 48, w = 250, h = 42;
+    const { x, y, w, h } = weaponSlotRect(i);
     const wep = player.weapons[i];
     const active = i === player.active;
     ctx.fillStyle = active ? 'rgba(255,255,255,0.16)' : 'rgba(0,0,0,0.5)';
@@ -959,8 +1060,8 @@ function renderHUD() {
     }
   }
 
-  // ability slot (bottom right)
-  {
+  // ability slot (bottom right, desktop only — touch has the ABILITY button)
+  if (!touch.enabled) {
     const w = 220, h = 56, x = W - w - 16, y = H - h - 16;
     ctx.fillStyle = 'rgba(0,0,0,0.5)';
     ctx.fillRect(x, y, w, h);
@@ -994,25 +1095,76 @@ function renderHUD() {
     const label = d.kind === 'ability'
       ? 'ability: ' + name
       : RARITIES[d.item.rarity].name + ' ' + name;
+    const prompt = (touch.enabled ? 'Take ' : '[F] Take ') + label;
+    const py = touch.enabled ? H - 232 : H - 190;
     ctx.font = 'bold 16px Segoe UI, Arial';
     ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    const tw = ctx.measureText('[F] Take ' + label).width;
-    ctx.fillRect(W / 2 - tw / 2 - 12, H - 190, tw + 24, 30);
+    const tw = ctx.measureText(prompt).width;
+    ctx.fillRect(W / 2 - tw / 2 - 12, py, tw + 24, 30);
     ctx.fillStyle = color;
-    ctx.fillText('[F] Take ' + label, W / 2, H - 169);
+    ctx.fillText(prompt, W / 2, py + 21);
     if (d.kind === 'weapon' && player.weapons.length >= 2) {
       ctx.font = '12px Segoe UI, Arial';
       ctx.fillStyle = '#b0bec5';
-      ctx.fillText('(replaces ' + player.weapons[player.active].name + ')', W / 2, H - 148);
+      ctx.fillText('(replaces ' + player.weapons[player.active].name + ')', W / 2, py + 42);
     }
   }
+
+  if (touch.enabled) renderTouchControls();
 
   // controls hint (first wave)
   if (game.wave === 1) {
     ctx.textAlign = 'center';
     ctx.font = '13px Segoe UI, Arial';
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.fillText('WASD move · Mouse aim/shoot · Q/scroll swap weapon · F pick up · SPACE ability', W / 2, H - 12);
+    ctx.fillText(touch.enabled
+      ? 'Left side: move · Right side: aim & shoot · Buttons: swap / ability / take'
+      : 'WASD move · Mouse aim/shoot · Q/scroll swap weapon · F pick up · SPACE ability', W / 2, H - 12);
+  }
+}
+
+function renderTouchControls() {
+  // floating sticks (ghost hints when idle)
+  const drawStick = (s, ghostX, ghostY, label) => {
+    const bx = s ? s.bx : ghostX, by = s ? s.by : ghostY;
+    ctx.globalAlpha = s ? 0.45 : 0.18;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(bx, by, STICK_R, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.globalAlpha = s ? 0.5 : 0.22;
+    ctx.beginPath(); ctx.arc(bx + (s ? s.dx : 0), by + (s ? s.dy : 0), KNOB_R, 0, Math.PI * 2); ctx.fill();
+    if (!s) {
+      ctx.globalAlpha = 0.4;
+      ctx.font = 'bold 11px Segoe UI, Arial'; ctx.textAlign = 'center';
+      ctx.fillText(label, bx, by + 4);
+    }
+    ctx.globalAlpha = 1;
+  };
+  drawStick(touch.move, 110, H - 120, 'MOVE');
+  drawStick(touch.aim, W - 110, H - 120, 'AIM + FIRE');
+
+  // buttons
+  for (const b of touchButtons()) {
+    let color = 'rgba(255,255,255,0.25)', ring = 'rgba(255,255,255,0.5)', label = b.label, sub = '';
+    if (b.id === 'ability') {
+      const a = player.ability;
+      if (a) {
+        label = a.name.toUpperCase();
+        color = a.timer > 0 ? 'rgba(120,130,140,0.35)' : a.color + 'cc';
+        if (a.timer > 0) sub = a.timer.toFixed(1);
+      } else { color = 'rgba(255,255,255,0.12)'; label = 'NO ABILITY'; }
+    }
+    if (b.id === 'take') { color = 'rgba(102,187,106,0.8)'; }
+    if (b.id === 'swap' && player.weapons.length < 2) color = 'rgba(255,255,255,0.12)';
+    ctx.fillStyle = color;
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = ring; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold ' + (label.length > 8 ? 9 : 11) + 'px Segoe UI, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(label, b.x, b.y + (sub ? -2 : 4));
+    if (sub) { ctx.font = 'bold 13px Segoe UI, Arial'; ctx.fillText(sub, b.x, b.y + 14); }
   }
 }
 
@@ -1073,7 +1225,7 @@ function renderMenu() {
 
   ctx.font = '14px Segoe UI, Arial';
   ctx.fillStyle = '#78909c';
-  ctx.fillText('Click a map or press 1 / 2 to start', W / 2, by + bh + 45);
+  ctx.fillText('Tap or click a map to start (or press 1 / 2)', W / 2, by + bh + 45);
 }
 
 function renderGameOver() {
@@ -1088,7 +1240,7 @@ function renderGameOver() {
   ctx.fillText('Survived to wave ' + game.wave + '  ·  ' + game.kills + ' kills  ·  ' + game.score + ' score', W / 2, H / 2 - 10);
   ctx.font = '17px Segoe UI, Arial';
   ctx.fillStyle = '#90a4ae';
-  ctx.fillText('Click or press R to return to the menu', W / 2, H / 2 + 40);
+  ctx.fillText('Tap anywhere to return to the menu', W / 2, H / 2 + 40);
 }
 
 requestAnimationFrame(frame);

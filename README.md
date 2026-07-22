@@ -13,6 +13,8 @@ A top-down infinite-wave shooter where every kill rolls random loot. Open
 
 Controls: `WASD` move · mouse aim/shoot · `F` pick up loot · `Q`/scroll swap weapon · `SPACE` use ability
 
+**Mobile**: full touch support — left virtual joystick to move, right joystick to aim & auto-fire, plus on-screen SWAP / ABILITY / TAKE buttons (tap weapon slots to switch).
+
 ---
 
 # React + Vite
