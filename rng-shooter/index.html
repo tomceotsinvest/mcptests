@@ -122,7 +122,7 @@ const ENEMY_TYPES = {
 const SPRITE_DEFS = {
   player: {
     anchor: [8, 7.5], body: 13,
-    palette: { K: '#1c262b', A: '#cfd8dc', S: '#78909c', V: '#4dd0e1', D: '#37474f' },
+    palette: { K: '#1c262b', A: '#cfd8dc', S: '#78909c', V: '#4dd0e1' },
     rows: [
       '....................',
       '......KKKKK.........',
@@ -130,9 +130,9 @@ const SPRITE_DEFS = {
       '...KAAAAAAAAAK......',
       '..KAAAAASSAAAAK.....',
       '..KAAAASVVSAAAK.....',
-      '.KAAAAASVVVSAAKDDD..',
-      '.KAAAAASVVVSAAKDDDDD',
-      '.KAAAAASVVVSAAKDDD..',
+      '.KAAAAASVVVSAAK.....',
+      '.KAAAAASVVVSAAK.....',
+      '.KAAAAASVVVSAAK.....',
       '..KAAAASVVSAAAK.....',
       '..KAAAAASSAAAAK.....',
       '...KAAAAAAAAAK......',
@@ -302,6 +302,299 @@ const SPRITE_DEFS = {
   },
 };
 
+// Weapon sprites (all face right; anchor = grip point for in-hand drawing)
+const WEAPON_SPRITE_DEFS = {
+  pistol: {
+    anchor: [5, 3.5], body: 10,
+    palette: { K: '#222b30', G: '#546e7a' },
+    rows: [
+      '....................',
+      '....................',
+      '...KKKKKKKK.........',
+      '...KGGGGGGGKK.......',
+      '...KKKKGGGGGK.......',
+      '......KGGK..........',
+      '......KKKK..........',
+      '....................',
+    ],
+  },
+  smg: {
+    anchor: [6, 3.5], body: 12,
+    palette: { K: '#222b30', G: '#546e7a', A: '#ffd54f' },
+    rows: [
+      '....................',
+      '..KKK...............',
+      '..KKKKKKKKKKKK......',
+      '..KGGGGGGGGGGKK.....',
+      '..KKKAGGGGGGGGK.....',
+      '....KGGKKGGK........',
+      '....KKK..KKK........',
+      '....................',
+    ],
+  },
+  shotgun: {
+    anchor: [6, 3.5], body: 14,
+    palette: { K: '#222b30', G: '#546e7a', W: '#8d6e63' },
+    rows: [
+      '....................',
+      '....................',
+      '..KKKKKKKKKKKKKKKK..',
+      '..KWWWKGGGGGGGGGGKK.',
+      '..KKKKWWWWKKKKKKKK..',
+      '......KWWK..........',
+      '......KKKK..........',
+      '....................',
+    ],
+  },
+  burst: {
+    anchor: [6, 3.5], body: 13,
+    palette: { K: '#222b30', G: '#546e7a', A: '#aed581' },
+    rows: [
+      '....................',
+      '......KAAK..........',
+      '..KKKKKKKKKKKKKKK...',
+      '..KGGGGGGGGGGGGGKK..',
+      '..KKKGGGKKGGGKKKK...',
+      '....KGGK.KGGK.......',
+      '....KKK...KKK.......',
+      '....................',
+    ],
+  },
+  ar: {
+    anchor: [6, 3.5], body: 14,
+    palette: { K: '#222b30', G: '#546e7a', A: '#81d4fa' },
+    rows: [
+      '....KKKKK...........',
+      '....KAAAK...........',
+      '..KKKKKKKKKKKKKKKK..',
+      '..KGGGGGGGGGGGGGGKK.',
+      '..KKKGGGKKKGGGKKKK..',
+      '....KGGK..KGGK......',
+      '....KKK...KKK.......',
+      '....................',
+    ],
+  },
+  uzis: {
+    anchor: [5, 3.5], body: 10,
+    palette: { K: '#222b30', A: '#80cbc4' },
+    rows: [
+      '..KKKKKKKKK.........',
+      '..KAAAAAAAKK........',
+      '..KKKAAKKKK.........',
+      '.....KK.............',
+      '..KKKKKKKKK.........',
+      '..KAAAAAAAKK........',
+      '..KKKAAKKKK.........',
+      '.....KK.............',
+    ],
+  },
+  sniper: {
+    anchor: [6, 3.5], body: 16,
+    palette: { K: '#222b30', G: '#546e7a', A: '#e1bee7' },
+    rows: [
+      '........KAAK........',
+      '........KKKK........',
+      '.KKKKKKKKKKKKKKKKKK.',
+      '.KGGGGGGGGGGGGGGGGKK',
+      '.KKKKGGGKKKKKKKKKKK.',
+      '.....KGGK...........',
+      '.....KKK............',
+      '....................',
+    ],
+  },
+  flame: {
+    anchor: [6, 3.5], body: 13,
+    palette: { K: '#222b30', G: '#546e7a', A: '#ff7043', F: '#ffca28' },
+    rows: [
+      '....................',
+      '..KKKKKKKKKK........',
+      '..KAAAAAAAAKKKKFF...',
+      '..KAAAAAAAAKGGKFFF..',
+      '..KKKKKKKKKKKKKFF...',
+      '....KGGK............',
+      '....KKK.............',
+      '....................',
+    ],
+  },
+  rocket: {
+    anchor: [6, 2.5], body: 15,
+    palette: { K: '#222b30', G: '#546e7a', A: '#ef5350', R: '#ff8a65' },
+    rows: [
+      '....................',
+      '.KKKKKKKKKKKKKKK....',
+      '.KAAKGGGGGGGGGGKRR..',
+      '.KAAKGGGGGGGGGGKRRR.',
+      '.KKKKKKKKKKKKKKKRR..',
+      '........KGGK........',
+      '........KKK.........',
+      '....................',
+    ],
+  },
+  laser: {
+    anchor: [6, 2.5], body: 13,
+    palette: { K: '#222b30', G: '#37474f', A: '#69f0ae' },
+    rows: [
+      '....................',
+      '..KKKKKKKKKKKKK.....',
+      '..KGAAAAAAAAAGKKAA..',
+      '..KGAAAAAAAAAGKAAA..',
+      '..KKKKKKKKKKKKKAA...',
+      '.....KGGK...........',
+      '.....KKK............',
+      '....................',
+    ],
+  },
+  minigun: {
+    anchor: [6, 3], body: 15,
+    palette: { K: '#222b30', G: '#78909c', A: '#ffca28' },
+    rows: [
+      '....................',
+      '.KKKKKKKKKKKKKKKK...',
+      '.KAAKGGGGGGGGGGGK...',
+      '.KAAKKKKKKKKKKKKKK..',
+      '.KAAKGGGGGGGGGGGK...',
+      '.KKKKKKKKKKKKKKKK...',
+      '......KGGK..........',
+      '......KKKK..........',
+    ],
+  },
+  railgun: {
+    anchor: [6, 2], body: 16,
+    palette: { K: '#222b30', G: '#37474f', A: '#40c4ff' },
+    rows: [
+      '.KKKKKKKKKKKKKKKKK..',
+      '.KGGAAAAAAAAAAAGGKK.',
+      '.KKKKKKKKKKKKKKKKK..',
+      '.KGGAAAAAAAAAAAGGKK.',
+      '.KKKKKKKKKKKKKKKKK..',
+      '......KGGK..........',
+      '......KKK...........',
+      '....................',
+    ],
+  },
+};
+
+// Ability icon sprites
+const ABILITY_SPRITE_DEFS = {
+  dash: {
+    anchor: [6, 6], body: 11,
+    palette: { A: '#4fc3f7' },
+    rows: [
+      '.............',
+      '..A....A.....',
+      '..AA...AA....',
+      '...AA...AA...',
+      '....AA...AA..',
+      '.....AA...AA.',
+      '....AA...AA..',
+      '...AA...AA...',
+      '..AA...AA....',
+      '..A....A.....',
+      '.............',
+      '.............',
+      '.............',
+    ],
+  },
+  nuke: {
+    anchor: [6, 6], body: 11,
+    palette: { O: '#ff7043', o: '#ffca28' },
+    rows: [
+      '.............',
+      '....OOOOO....',
+      '...OOooOOO...',
+      '..OOooooOOO..',
+      '..OOOooOOOO..',
+      '...OOOOOOO...',
+      '......O......',
+      '......O......',
+      '.....OOO.....',
+      '....OOOOO....',
+      '...OOOOOOO...',
+      '.............',
+      '.............',
+    ],
+  },
+  freeze: {
+    anchor: [6, 6], body: 11,
+    palette: { C: '#b3e5fc' },
+    rows: [
+      '.............',
+      '......C......',
+      '..C...C...C..',
+      '...C..C..C...',
+      '....C.C.C....',
+      '.....CCC.....',
+      '.CCCCCCCCCCC.',
+      '.....CCC.....',
+      '....C.C.C....',
+      '...C..C..C...',
+      '..C...C...C..',
+      '......C......',
+      '.............',
+    ],
+  },
+  heal: {
+    anchor: [6, 5], body: 11,
+    palette: { W: '#f5f5f5', G: '#66bb6a' },
+    rows: [
+      '.............',
+      '..WWWWWWWWW..',
+      '.WWWWGGGWWWW.',
+      '.WWWWGGGWWWW.',
+      '.WGGGGGGGGGW.',
+      '.WGGGGGGGGGW.',
+      '.WGGGGGGGGGW.',
+      '.WWWWGGGWWWW.',
+      '.WWWWGGGWWWW.',
+      '..WWWWWWWWW..',
+      '.............',
+      '.............',
+      '.............',
+    ],
+  },
+  shield: {
+    anchor: [6, 6], body: 11,
+    palette: { Y: '#ffd740', y: '#b28704' },
+    rows: [
+      '.............',
+      '.YYYYYYYYYYY.',
+      '.YyyyyyyyyyY.',
+      '.YyYYYYYYYyY.',
+      '.YyYYYYYYYyY.',
+      '.YyYYYYYYYyY.',
+      '..YyYYYYYyY..',
+      '..YyYYYYYyY..',
+      '...YyYYYyY...',
+      '....YyYyY....',
+      '.....YyY.....',
+      '......Y......',
+      '.............',
+    ],
+  },
+  turret: {
+    anchor: [6, 5], body: 11,
+    palette: { P: '#ce93d8', p: '#7b1fa2' },
+    rows: [
+      '.............',
+      '....PPPPP....',
+      '...PPPPPPP...',
+      '...PPPPPPPppp',
+      '...PPPPPPPppp',
+      '....PPPPP....',
+      '.....ppp.....',
+      '....ppppp....',
+      '...ppppppp...',
+      '..ppppppppp..',
+      '.............',
+      '.............',
+      '.............',
+    ],
+  },
+};
+
+for (const [id, def] of Object.entries(WEAPON_SPRITE_DEFS)) SPRITE_DEFS['w_' + id] = def;
+for (const [id, def] of Object.entries(ABILITY_SPRITE_DEFS)) SPRITE_DEFS['ab_' + id] = def;
+
 function tintSprite(src, color, alpha) {
   const c = document.createElement('canvas');
   c.width = src.width; c.height = src.height;
@@ -321,16 +614,34 @@ for (const [name, def] of Object.entries(SPRITE_DEFS)) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const g = c.getContext('2d');
+  let minX = w, minY = h, maxX = 0, maxY = 0;
   def.rows.forEach((row, y) => {
     for (let x = 0; x < row.length; x++) {
       const ch = row[x];
-      if (ch !== '.') { g.fillStyle = def.palette[ch]; g.fillRect(x, y, 1, 1); }
+      if (ch !== '.') {
+        g.fillStyle = def.palette[ch]; g.fillRect(x, y, 1, 1);
+        if (x < minX) minX = x; if (x > maxX) maxX = x;
+        if (y < minY) minY = y; if (y > maxY) maxY = y;
+      }
     }
   });
   SPRITES[name] = {
     img: c, w, h, cx: def.anchor[0], cy: def.anchor[1], body: def.body,
+    ccx: (minX + maxX + 1) / 2, ccy: (minY + maxY + 1) / 2, // content center (for icons)
     flash: tintSprite(c, '#ffffff', 1), frozen: tintSprite(c, '#90caf9', 0.55),
   };
+}
+
+// draw a sprite centered on its visible pixels (for drops / HUD icons)
+function drawIconAt(name, x, y, scale, angle) {
+  const s = SPRITES[name];
+  ctx.save();
+  ctx.translate(x, y);
+  if (angle) ctx.rotate(angle);
+  ctx.scale(scale, scale);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(s.img, -s.ccx, -s.ccy);
+  ctx.restore();
 }
 
 function drawSprite(name, variant, x, y, angle, scale, squashY) {
@@ -1023,21 +1334,9 @@ function render(dt) {
     ctx.beginPath(); ctx.arc(0, 0, 18, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
     if (d.kind === 'ability') {
-      // star shape for abilities
-      ctx.fillStyle = color;
-      ctx.beginPath();
-      for (let i = 0; i < 10; i++) {
-        const r = i % 2 ? 5 : 11;
-        const a = (i / 10) * Math.PI * 2 - Math.PI / 2;
-        ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-      }
-      ctx.closePath(); ctx.fill();
+      drawIconAt('ab_' + d.item.id, 0, 0, 1.9, 0);
     } else {
-      ctx.fillStyle = color;
-      ctx.rotate(Math.PI / 4);
-      ctx.fillRect(-8, -8, 16, 16);
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(-8, -8, 16, 6);
+      drawIconAt('w_' + d.item.id, 0, 0, 1.8, Math.sin(d.bob) * 0.18);
     }
     ctx.restore();
   }
@@ -1199,16 +1498,20 @@ function renderPlayer() {
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(0, 0, player.r + 8, 0, Math.PI * 2); ctx.stroke();
   }
-  // sprite body (includes the rifle, drawn facing the aim direction)
+  // body sprite, rotated to the aim direction
   const scale = (player.r * 2 * 1.15) / SPRITES.player.body;
   drawSprite('player', player.hurtFlash > 0 ? 'flash' : 'normal', 0, 0, angle, scale);
-  // rarity-colored band on the gun barrel
+  // equipped weapon sprite, held pointing along the aim (anchored at its grip)
   const w = player.weapons[player.active];
-  if (w && player.hurtFlash <= 0) {
+  if (w) {
+    const ws = SPRITES['w_' + w.id];
+    ctx.save();
     ctx.rotate(angle);
-    ctx.fillStyle = RARITIES[w.rarity].color;
-    ctx.fillRect((15.5 - SPRITES.player.cx) * scale, -1.6 * scale, 3.5 * scale, 3.2 * scale);
-    ctx.rotate(-angle);
+    ctx.translate(player.r * 0.55, 1);
+    ctx.scale(1.9, 1.9);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(player.hurtFlash > 0 ? ws.flash : ws.img, -ws.cx, -ws.cy);
+    ctx.restore();
   }
   ctx.restore();
 }
@@ -1267,6 +1570,7 @@ function renderHUD() {
       ctx.fillText('[' + (i + 1) + '] ' + wep.name, x + 10, y + 18);
       ctx.font = '11px Segoe UI, Arial';
       ctx.fillText(rc.name + '  ·  ' + wep.dmg + ' dmg  ·  ' + wep.rate + '/s', x + 10, y + 34);
+      drawIconAt('w_' + wep.id, x + w - 32, y + h / 2, 1.5, 0);
     } else {
       ctx.fillStyle = '#78909c';
       ctx.font = '13px Segoe UI, Arial';
@@ -1288,6 +1592,7 @@ function renderHUD() {
       ctx.font = '11px Segoe UI, Arial';
       ctx.fillStyle = '#b0bec5';
       ctx.fillText(a.desc, x + 10, y + 36);
+      drawIconAt('ab_' + a.id, x + w - 22, y + 20, 1.3, 0);
       // cooldown bar
       ctx.fillStyle = '#263238';
       ctx.fillRect(x + 10, y + 43, w - 20, 6);
@@ -1374,11 +1679,17 @@ function renderTouchControls() {
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = ring; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
-    ctx.fillStyle = '#fff';
-    ctx.font = 'bold ' + (label.length > 8 ? 9 : 11) + 'px Segoe UI, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(label, b.x, b.y + (sub ? -2 : 4));
-    if (sub) { ctx.font = 'bold 13px Segoe UI, Arial'; ctx.fillText(sub, b.x, b.y + 14); }
+    // icon on the ability button (the icon replaces the long name)
+    if (b.id === 'ability' && player.ability) {
+      drawIconAt('ab_' + player.ability.id, b.x, b.y - (sub ? 6 : 0), 1.6, 0);
+      ctx.fillStyle = '#fff';
+      if (sub) { ctx.font = 'bold 13px Segoe UI, Arial'; ctx.textAlign = 'center'; ctx.fillText(sub, b.x, b.y + 22); }
+    } else {
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold ' + (label.length > 8 ? 9 : 11) + 'px Segoe UI, Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(label, b.x, b.y + 4);
+    }
   }
 }
 
