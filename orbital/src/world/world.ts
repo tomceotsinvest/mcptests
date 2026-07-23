@@ -297,6 +297,16 @@ function nearestNextPlanet(w: World): Planet | null {
   return best;
 }
 
+/**
+ * The planet the player is about to interact with: the one being orbited, else
+ * the one a hold would grab (in capture range), else the next one ahead. Drives
+ * the pulsing target highlight so you always know your swing target.
+ */
+export function currentTarget(w: World): Planet | null {
+  if (w.ship.mode === 'orbit') return w.ship.planet;
+  return findCaptureTarget(w.ship, w.planets) ?? nearestNextPlanet(w);
+}
+
 function doCaptureAttempt(w: World): void {
   const target = findCaptureTarget(w.ship, w.planets);
   if (target) {

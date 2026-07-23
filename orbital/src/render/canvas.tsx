@@ -31,6 +31,7 @@ import { drawTrail } from '@/render/drawTrail';
 import { drawDust, drawCaptureRadii, drawGripFlash, drawOrbitPath } from '@/render/drawFx';
 import { makeStarfield, drawStarfield, type Starfield } from '@/render/drawStarfield';
 import {
+  currentTarget,
   drainEvents,
   frame as frameWorld,
   simStep,
@@ -169,8 +170,10 @@ export function GameCanvas({
 
         if (debug?.captureRadii) drawCaptureRadii(canvas, world.planets);
         drawDust(canvas, world.dust, palette, time);
+        const target = currentTarget(world);
         for (let i = 0; i < world.planets.activeCount; i++) {
-          drawPlanet(canvas, world.planets.get(i), palette);
+          const planet = world.planets.get(i);
+          drawPlanet(canvas, planet, palette, planet === target, time);
         }
         if (debug?.orbitPaths) drawOrbitPath(canvas, world.ship);
         drawTrail(

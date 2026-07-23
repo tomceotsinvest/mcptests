@@ -6,7 +6,7 @@
  * desaturated body. Drawn in WORLD space (call inside the camera transform).
  */
 import type { SkCanvas } from '@shopify/react-native-skia';
-import { PaintStyle, Skia } from '@shopify/react-native-skia';
+import { BlendMode, PaintStyle, Skia } from '@shopify/react-native-skia';
 import type { Palette } from '@/config/theme';
 import type { Planet } from '@/world/entities';
 import { withAlpha } from '@/render/color';
@@ -19,12 +19,27 @@ ringPaint.setAntiAlias(true);
 bodyPaint.setAntiAlias(true);
 glowPaint.setAntiAlias(true);
 
-export function drawPlanet(canvas: SkCanvas, p: Planet, palette: Palette): void {
-  const breathe = 1 + 0.03 * Math.sin(p.pulse * 1.6);
+const hiPaint = Skia.Paint();
+hiPaint.setStyle(PaintStyle.Stroke);
+hiPaint.setAntiAlias(true);
+hiPaint.setBlendMode(BlendMode.Plus); // additive lock-on glow
+
+export function drawPlanet(
+  canvas: SkCanvas,
+  p: Planet,
+  palette: Palette,
+  isTarget = false,
+  time = 0,
+): void {
+  // the target planet breathes harder so it reads as "live" even before the ring.
+  const amp = isTarget ? 0.07 : 0.03;
+  const breathe = 1 + amp * Math.sin(p.pulse * 1.6);
   const r = p.r * breathe;
 
   const hue = p.kind === 'rogue' ? palette.roguePlanet : palette.planetHues[p.hue % 4]!;
-  const ringColor = p.kind === 'rogue' ? palette.rogueRing : withAlpha(palette.planetRing, 0.5);
+  const baseRingAlpha = isTarget ? 0.25 : 0.5;
+  const ringColor =
+    p.kind === 'rogue' ? palette.rogueRing : withAlpha(palette.planetRing, baseRingAlpha);
 
   // wide glow
   glowPaint.setColor(Skia.Color(withAlpha(hue, 0.12)));
@@ -46,6 +61,45 @@ export function drawPlanet(canvas: SkCanvas, p: Planet, palette: Palette): void 
     ringPaint.setColor(Skia.Color(ringColor));
     ringPaint.setStrokeWidth(2);
     canvas.drawCircle(p.x, p.y, r * 1.5, ringPaint);
+  }
+
+  if (isTarget) drawTargetHighlight(canvas, p, r, time, palette);
+}
+
+/**
+ * A pulsing cyan lock-on ring + expanding echo + rotating reticle ticks, so the
+ * player always knows which planet they're about to swing onto.
+ */
+function drawTargetHighlight(
+  canvas: SkCanvas,
+  p: Planet,
+  r: number,
+  time: number,
+  palette: Palette,
+): void {
+  const pulse = 0.5 + 0.5 * Math.sin(time * 6);
+  const lock = palette.ship;
+
+  // solid pulsing lock ring
+  hiPaint.setColor(Skia.Color(withAlpha(lock, 0.55 + 0.4 * pulse)));
+  hiPaint.setStrokeWidth(2.5 + 1.5 * pulse);
+  canvas.drawCircle(p.x, p.y, r * 1.55 + 5 * pulse, hiPaint);
+
+  // expanding echo ring
+  const e = (time * 0.9) % 1;
+  hiPaint.setColor(Skia.Color(withAlpha(lock, (1 - e) * 0.7)));
+  hiPaint.setStrokeWidth(2);
+  canvas.drawCircle(p.x, p.y, r * 1.55 + e * 26, hiPaint);
+
+  // rotating reticle ticks
+  hiPaint.setColor(Skia.Color(withAlpha(lock, 0.5 + 0.5 * pulse)));
+  hiPaint.setStrokeWidth(2);
+  const rr = r * 1.55 + 5 * pulse;
+  for (let a = 0; a < 4; a++) {
+    const ang = a * (Math.PI / 2) + time * 0.6;
+    const c = Math.cos(ang);
+    const s = Math.sin(ang);
+    canvas.drawLine(p.x + c * rr, p.y + s * rr, p.x + c * (rr + 7), p.y + s * (rr + 7), hiPaint);
   }
 }
 
