@@ -186,21 +186,30 @@ function clampX(w: World, x: number): number {
 }
 
 /**
+ * Next planet x: a reachable step from the last (within ~1 gap, a ~45° cone),
+ * but MEAN-REVERTING toward centre (the `* 0.45`) so the column samples
+ * left/middle/right instead of random-walking into one edge and hugging it.
+ */
+function nextPlanetX(w: World, lastX: number, gap: number): number {
+  const maxDX = Math.min(gap, bandHalf(w) * 2);
+  return clampX(w, lastX * 0.45 + w.rng.range(-maxDX, maxDX));
+}
+
+/**
  * M1 starter field: planets climbing upward, each within a reachable cone of the
  * previous one (a ~45° step). M2 replaces this with the chunked generator that
  * runs an explicit reachability check at the current world speed.
  */
 function seedStarterField(w: World): void {
-  // First planet sits close so the opening climb reaches it before the ship
-  // stalls under gravity; the rest chain within a reachable cone above.
-  let y = -190;
-  let lastX = 0;
+  // First planet sits close and near-centre so the opening climb reaches it
+  // before the ship stalls under gravity; the rest scatter left/middle/right.
+  let y = -175;
+  let lastX = w.rng.range(-30, 30);
   for (let i = 0; i < 7; i++) {
     const p = w.planets.obtain();
     if (!p) break;
     const gap = w.rng.range(210, 260);
-    // reachable horizontal step: within ~1 gap of the last planet.
-    const x = clampX(w, lastX + w.rng.range(-gap, gap) * 0.85);
+    const x = i === 0 ? clampX(w, lastX) : nextPlanetX(w, lastX, gap);
     p.x = x;
     p.y = y;
     p.r = w.rng.range(24, 52);
@@ -238,10 +247,11 @@ function recyclePlanets(w: World): void {
   const killY = w.camera.y + w.vp.h / 2 + T.OFFSCREEN_MARGIN + 200;
   w.planets.forEachActive((p) => {
     if (p.y > killY) {
-      // re-spawn above the current top, within a reachable cone of it.
+      // re-spawn above the current top, scattered left/middle/right but still
+      // within a reachable cone of it.
       const gap = w.rng.range(210, 260);
       w.topPlanetY -= gap;
-      w.topPlanetX = clampX(w, w.topPlanetX + w.rng.range(-gap, gap) * 0.85);
+      w.topPlanetX = nextPlanetX(w, w.topPlanetX, gap);
       p.x = w.topPlanetX;
       p.y = w.topPlanetY;
       p.r = w.rng.range(24, 52);
