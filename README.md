@@ -1,16 +1,41 @@
-# React + Vite
+# Pushups → Screen Time
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A webcam app that counts your pushups and rewards each one with **1 minute of screen time**.
 
-Currently, two official plugins are available:
+Get into a side-on view of your camera, and the app uses on-device pose
+detection to watch your elbow angle: bend down past ~100° and straighten back
+past ~155° to complete a rep. Every completed pushup adds a minute to your
+screen-time bank, which you can spend with a live countdown timer.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Features
 
-## React Compiler
+- **Live pushup counting** via [TensorFlow.js MoveNet](https://www.tensorflow.org/hub/tutorials/movenet) pose detection, with a skeleton overlay on the video feed.
+- **Screen-time bank** — each rep banks 1 minute; hit **Spend time** to run the countdown, **Pause** to stop it. The balance persists across reloads.
+- **Private by design** — all pose inference runs in your browser. No video ever leaves your machine.
+- **Manual fallback** — if the camera or model can't load, a `+1 pushup` button keeps the app usable.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Running it
 
-## Expanding the ESLint configuration
+```bash
+npm install
+npm run dev
+```
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Then open the printed URL and click **Start camera** (your browser will ask
+for camera permission). Camera access requires a secure context — `localhost`
+during development, or HTTPS if you deploy it.
+
+## How rep detection works
+
+The counter (in `src/pushupCounter.js`) computes the angle at each elbow from
+the shoulder, elbow, and wrist keypoints. It runs a small state machine: from
+the "up" phase, bending below ~100° switches to "down"; straightening back
+past ~155° counts one rep and returns to "up". Angle thresholds and the minimum
+keypoint confidence live at the top of that file if you want to tune them.
+
+## Scripts
+
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm run lint` — run ESLint
+- `npm run preview` — preview the production build
