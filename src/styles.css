@@ -5,10 +5,17 @@
 }
 
 html,
-body,
-#root {
+body {
   margin: 0;
   height: 100%;
+  overflow: hidden;
+}
+
+/* Anchor to the viewport so the game fills the screen even when the page
+   embeds it inside a wrapper element (e.g. hosted artifact pages). */
+#root {
+  position: fixed;
+  inset: 0;
   overflow: hidden;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 14px;
@@ -17,9 +24,8 @@ body,
 }
 
 .app {
-  position: relative;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
 }
 
 .map-canvas {
