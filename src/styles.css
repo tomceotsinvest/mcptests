@@ -1,0 +1,504 @@
+/* London Transport Commissioner — UI chrome */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  color: #e6e8ee;
+  background: #10141f;
+}
+
+.app {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.map-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: none;
+}
+.map-canvas:active {
+  cursor: grabbing;
+}
+
+/* ------------------------------------------------------------- top bar */
+
+.topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+  background: rgba(16, 20, 31, 0.94);
+  border-bottom: 1px solid #2a3040;
+  backdrop-filter: blur(6px);
+  z-index: 20;
+  white-space: nowrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.roundel {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: radial-gradient(circle, transparent 0 34%, #dc241f 35% 100%);
+  position: relative;
+  flex: none;
+}
+.roundel::after {
+  content: '';
+  position: absolute;
+  left: -3px;
+  right: -3px;
+  top: 7px;
+  height: 4px;
+  background: #0019a8;
+}
+
+.clock {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.clock b {
+  font-size: 15px;
+}
+.clock span {
+  font-size: 10px;
+  color: #97a0b5;
+}
+
+.speeds button {
+  background: #1b2231;
+  color: #cfd6e6;
+  border: 1px solid #2a3040;
+  padding: 4px 8px;
+  cursor: pointer;
+}
+.speeds button:first-child {
+  border-radius: 6px 0 0 6px;
+}
+.speeds button:last-child {
+  border-radius: 0 6px 6px 0;
+}
+.speeds button.active {
+  background: #2f5cd0;
+  color: #fff;
+}
+
+.stat {
+  font-size: 13px;
+  color: #cfd6e6;
+}
+.stat .dim {
+  font-size: 11px;
+}
+
+.grow {
+  flex: 1;
+}
+
+.tab {
+  background: transparent;
+  color: #cfd6e6;
+  border: 1px solid #2a3040;
+  border-radius: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.tab.active,
+.tab:hover {
+  background: #223050;
+  color: #fff;
+}
+
+/* ------------------------------------------------------------- toolbar */
+
+.toolbar {
+  position: absolute;
+  top: 58px;
+  left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 15;
+}
+
+.toolbar button {
+  width: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  background: rgba(16, 20, 31, 0.92);
+  color: #cfd6e6;
+  border: 1px solid #2a3040;
+  border-radius: 8px;
+  padding: 6px 2px;
+  cursor: pointer;
+}
+.toolbar button span {
+  font-size: 17px;
+}
+.toolbar button small {
+  font-size: 9px;
+  color: #97a0b5;
+}
+.toolbar button.active {
+  background: #2f5cd0;
+  border-color: #4a74e8;
+  color: #fff;
+}
+.toolbar button.active small {
+  color: #dbe4ff;
+}
+.toolbar .divider {
+  height: 8px;
+}
+
+/* ---------------------------------------------------------- side panel */
+
+.sidepanel {
+  position: absolute;
+  top: 58px;
+  right: 10px;
+  bottom: 46px;
+  width: 320px;
+  overflow-y: auto;
+  background: rgba(16, 20, 31, 0.94);
+  border: 1px solid #2a3040;
+  border-radius: 10px;
+  z-index: 15;
+  backdrop-filter: blur(6px);
+}
+
+.panel-body {
+  padding: 12px 14px 18px;
+}
+.panel-body h3 {
+  margin: 2px 0 8px;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.panel-body h4 {
+  margin: 14px 0 6px;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #97a0b5;
+}
+.panel-body p {
+  margin: 6px 0;
+  line-height: 1.45;
+}
+
+.dim {
+  color: #97a0b5;
+}
+.bad {
+  color: #ff6b6b;
+}
+.good {
+  color: #3fb950;
+}
+
+.badge {
+  font-size: 9px;
+  background: #2a3040;
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin-left: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #97a0b5;
+}
+.badge.bad {
+  background: #58151c;
+  color: #ff8f8f;
+}
+
+.swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  flex: none;
+}
+
+.kv {
+  width: 100%;
+  border-collapse: collapse;
+}
+.kv td {
+  padding: 4px 0;
+  border-bottom: 1px solid #1d2434;
+  font-size: 13px;
+}
+.kv td:first-child {
+  color: #97a0b5;
+}
+.kv td:last-child {
+  text-align: right;
+}
+.kv button {
+  background: #1b2231;
+  border: 1px solid #2a3040;
+  color: #cfd6e6;
+  border-radius: 5px;
+  width: 22px;
+  cursor: pointer;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.btn-row button,
+.modal button {
+  background: #1b2231;
+  color: #e6e8ee;
+  border: 1px solid #2a3040;
+  border-radius: 7px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button.primary {
+  background: #2f5cd0 !important;
+  border-color: #4a74e8 !important;
+}
+button.primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+button.danger {
+  background: #58151c !important;
+  border-color: #7d2530 !important;
+}
+
+.route-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.route-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  color: #e6e8ee;
+  padding: 5px 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.route-row:hover {
+  background: #1b2231;
+}
+.route-row .grow {
+  flex: 1;
+}
+
+.type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.type-list button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background: #151b28;
+  border: 1px solid #2a3040;
+  border-radius: 7px;
+  color: #e6e8ee;
+  padding: 6px 9px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.type-list button small {
+  color: #97a0b5;
+  font-size: 10px;
+}
+.type-list button.active {
+  border-color: #4a74e8;
+  background: #1c2a4a;
+}
+
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+.check select {
+  background: #1b2231;
+  color: #e6e8ee;
+  border: 1px solid #2a3040;
+  border-radius: 5px;
+}
+
+.spark {
+  margin-top: 12px;
+}
+.spark canvas {
+  width: 100%;
+  height: 40px;
+  display: block;
+  background: #0d111a;
+  border-radius: 6px;
+  margin-top: 3px;
+}
+
+.ach {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 0;
+  border-bottom: 1px solid #1d2434;
+  opacity: 0.55;
+}
+.ach.got {
+  opacity: 1;
+}
+.ach b {
+  font-size: 13px;
+}
+
+.help-list {
+  padding-left: 4px;
+  list-style: none;
+  line-height: 1.7;
+}
+
+/* --------------------------------------------------------------- ticker */
+
+.ticker {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  background: rgba(16, 20, 31, 0.94);
+  border-top: 1px solid #2a3040;
+  z-index: 15;
+  overflow: hidden;
+}
+.ticker-label {
+  flex: none;
+  background: #dc241f;
+  color: #fff;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 4px 10px;
+  margin-right: 12px;
+  letter-spacing: 0.08em;
+}
+.ticker-items {
+  display: flex;
+  gap: 42px;
+  white-space: nowrap;
+  font-size: 12px;
+  color: #b9c2d6;
+}
+.ticker-items .fresh {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------- modals */
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 8, 15, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal {
+  background: #141a28;
+  border: 1px solid #2a3040;
+  border-radius: 14px;
+  padding: 22px 26px;
+  max-width: 420px;
+}
+.modal.wide {
+  max-width: 620px;
+}
+.modal h2 {
+  margin: 0 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.diff-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(105px, 1fr));
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+.diff-grid button {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  text-align: left;
+  padding: 9px 10px;
+  min-height: 84px;
+}
+.diff-grid button.active {
+  border-color: #4a74e8;
+  background: #1c2a4a;
+}
+.diff-grid small {
+  font-size: 10px;
+}
+
+.seed-label input {
+  width: 130px;
+  background: #1b2231;
+  color: #e6e8ee;
+  border: 1px solid #2a3040;
+  border-radius: 5px;
+  padding: 4px 7px;
+  margin-left: 6px;
+}
