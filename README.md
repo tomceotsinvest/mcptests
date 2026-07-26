@@ -1,3 +1,11 @@
+# mcptests
+
+## 🚦 Gridlock — Traffic Engineer Simulator
+
+A complete browser-based traffic management simulation game lives in [`traffic-game/`](traffic-game/) — procedural cities, real-world OpenStreetMap import, thousands of individually simulated vehicles, public transport, weather, accidents, economy, campaign and sandbox. No build step: open `traffic-game/index.html` in a browser. See [`traffic-game/README.md`](traffic-game/README.md).
+
+---
+
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

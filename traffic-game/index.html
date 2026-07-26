@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gridlock — Traffic Engineer Simulator</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚦</text></svg>">
+</head>
+<body>
+<div id="app">
+
+  <!-- ======= TOP BAR ======= -->
+  <header id="topbar">
+    <div class="tb-group brand">
+      <span class="logo">🚦</span>
+      <div class="brand-text">
+        <span class="title">GRIDLOCK</span>
+        <span class="subtitle" id="levelName">Traffic Engineer</span>
+      </div>
+    </div>
+    <div class="tb-group" id="clockGroup">
+      <div class="clock">
+        <span id="clockTime">07:30</span>
+        <span id="clockDay">Mon · Day 1</span>
+      </div>
+      <div class="daylight-bar"><div id="daylightMarker"></div></div>
+      <span id="weatherIcon" title="Weather">☀️</span>
+      <span id="phaseLabel" class="phase-label">Morning rush</span>
+    </div>
+    <div class="tb-group time-controls">
+      <button id="btnPause" class="tc-btn" title="Pause (Space)">⏸</button>
+      <button id="btnPlay" class="tc-btn active" title="Normal speed (1)">▶</button>
+      <button id="btnFast" class="tc-btn" title="Fast (2)">▶▶</button>
+      <button id="btnFaster" class="tc-btn" title="Very fast (3)">▶▶▶</button>
+    </div>
+    <div class="tb-group grow">
+      <input id="searchBox" type="text" placeholder="🔍 Search roads &amp; places… (Enter)" autocomplete="off">
+      <div id="searchResults" class="hidden"></div>
+    </div>
+    <div class="tb-group stats-mini">
+      <span class="stat-chip" id="chipBudget" title="Budget">💰 <b>—</b></span>
+      <span class="stat-chip" id="chipPop" title="Population">👥 <b>—</b></span>
+      <span class="stat-chip" id="chipCong" title="Network congestion">🚗 <b>—</b></span>
+      <span class="stat-chip" id="chipScore" title="Score">⭐ <b>—</b></span>
+    </div>
+    <div class="tb-group">
+      <button id="btnUndo" class="icon-btn" title="Undo (Ctrl+Z)">↶</button>
+      <button id="btnRedo" class="icon-btn" title="Redo (Ctrl+Y)">↷</button>
+      <button id="btnSave" class="icon-btn" title="Save / Load (F5)">💾</button>
+      <button id="btnStats" class="icon-btn" title="Statistics (G)">📊</button>
+      <button id="btnAchievements" class="icon-btn" title="Achievements">🏆</button>
+      <button id="btnMenu" class="icon-btn" title="Menu (Esc)">☰</button>
+    </div>
+  </header>
+
+  <!-- ======= LEFT TOOLBAR ======= -->
+  <aside id="toolbar">
+    <div class="tool-cat" data-cat="select">
+      <div class="cat-head">🖱 Inspect</div>
+      <div class="cat-tools">
+        <button class="tool" data-tool="select" title="Select roads, junctions and vehicles to inspect them [Q]">Select <kbd>Q</kbd></button>
+        <button class="tool" data-tool="follow" title="Click a vehicle to follow it">Follow car</button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="roads">
+      <div class="cat-head">🛣 Roads</div>
+      <div class="cat-tools">
+        <button class="tool" data-tool="road-local" title="Build local street — cheap, 30 km/h – 48 km/h, 1 lane each way [R]">Local road <kbd>R</kbd></button>
+        <button class="tool" data-tool="road-arterial" title="Build arterial road — 2 lanes each way, 60 km/h">Arterial</button>
+        <button class="tool" data-tool="road-motorway" title="Build motorway — fast, high capacity, no junctions with lights">Motorway</button>
+        <button class="tool" data-tool="bridge" title="Build a bridge segment over water or roads">Bridge</button>
+        <button class="tool" data-tool="tunnel" title="Build a tunnel under obstacles — expensive">Tunnel</button>
+        <button class="tool" data-tool="upgrade" title="Upgrade road: local → arterial → motorway, or add a lane [U]">Upgrade <kbd>U</kbd></button>
+        <button class="tool" data-tool="downgrade" title="Downgrade road or remove a lane">Downgrade</button>
+        <button class="tool" data-tool="delete" title="Demolish a road (partial refund) [X]">Demolish <kbd>X</kbd></button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="control">
+      <div class="cat-head">🚦 Traffic control</div>
+      <div class="cat-tools">
+        <button class="tool" data-tool="lights" title="Place / remove traffic lights at a junction [T]">Signals <kbd>T</kbd></button>
+        <button class="tool" data-tool="timing" title="Adjust and synchronise signal timings">Timings</button>
+        <button class="tool" data-tool="stop" title="Place / remove stop signs">Stop sign</button>
+        <button class="tool" data-tool="roundabout" title="Convert a junction to a roundabout — great for medium flows">Roundabout</button>
+        <button class="tool" data-tool="oneway" title="Make a road one-way; click again to reverse, again to restore two-way [O]">One-way <kbd>O</kbd></button>
+        <button class="tool" data-tool="speed-up" title="Raise speed limit by 10 km/h">Speed +</button>
+        <button class="tool" data-tool="speed-down" title="Lower speed limit by 10 km/h">Speed −</button>
+        <button class="tool" data-tool="close" title="Close / reopen a road temporarily (no cost)">Close road</button>
+        <button class="tool" data-tool="ltn" title="Low-traffic neighbourhood: local roads allow only local trips">LTN zone</button>
+        <button class="tool" data-tool="crossing" title="Add a pedestrian crossing — slows cars slightly, boosts happiness">Crossing</button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="lanes">
+      <div class="cat-head">🚌 Lanes</div>
+      <div class="cat-tools">
+        <button class="tool" data-tool="buslane" title="Reserve a lane for buses — buses bypass queues">Bus lane</button>
+        <button class="tool" data-tool="cyclelane" title="Add a cycle lane — shifts short trips to bikes">Cycle lane</button>
+        <button class="tool" data-tool="pedestrianise" title="Pedestrianise a street — no cars, big happiness boost">Pedestrianise</button>
+        <button class="tool" data-tool="turnlane" title="Add a dedicated turning lane at the junction end of a road">Turn lane</button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="transit">
+      <div class="cat-head">🚇 Public transport</div>
+      <div class="cat-tools">
+        <button class="tool" data-tool="busroute" title="Draw a bus route along roads; click junctions, double-click to finish [B]">Bus route <kbd>B</kbd></button>
+        <button class="tool" data-tool="tram" title="Draw a tram line — higher capacity than buses">Tram line</button>
+        <button class="tool" data-tool="metro" title="Draw a metro line — underground, ignores roads, huge capacity">Metro</button>
+        <button class="tool" data-tool="rail" title="Draw a commuter rail line between districts">Rail</button>
+        <button class="tool" data-tool="bikeshare" title="Place a bike hire station">Bike hire</button>
+        <button class="tool" data-tool="parkride" title="Park &amp; ride: drivers park here and continue by transit">Park &amp; ride</button>
+        <button class="tool" data-tool="carpark" title="Multi-storey car park — absorbs parking traffic nearby">Car park</button>
+        <button class="tool" data-tool="taxirank" title="Taxi rank — reduces private car trips nearby">Taxi rank</button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="overlay">
+      <div class="cat-head">🗺 Overlays</div>
+      <div class="cat-tools">
+        <button class="tool ovl" data-ovl="heat" title="Congestion heatmap [H]">Congestion <kbd>H</kbd></button>
+        <button class="tool ovl" data-ovl="pollution" title="CO₂ / pollution overlay">Pollution</button>
+        <button class="tool ovl" data-ovl="noise" title="Noise overlay">Noise</button>
+        <button class="tool ovl" data-ovl="transit" title="Show transit lines and usage">Transit</button>
+        <button class="tool ovl" data-ovl="paths" title="Show live vehicle paths when selected">Paths</button>
+        <button class="tool ovl" data-ovl="zones" title="Show land-use zones">Zones</button>
+      </div>
+    </div>
+    <div class="tool-cat" data-cat="sandbox hidden" id="sandboxTools">
+      <div class="cat-head">🧪 Sandbox</div>
+      <div class="cat-tools">
+        <button class="tool sbx" data-sbx="accident" title="Spawn an accident on a road you click">Accident</button>
+        <button class="tool sbx" data-sbx="roadworks" title="Spawn roadworks on a road you click">Roadworks</button>
+        <button class="tool sbx" data-sbx="event" title="Trigger a random city event">Event</button>
+        <button class="tool sbx" data-sbx="weather" title="Cycle the weather">Weather</button>
+        <button class="tool sbx" data-sbx="demand-up" title="Increase traffic demand">Demand +</button>
+        <button class="tool sbx" data-sbx="demand-down" title="Decrease traffic demand">Demand −</button>
+        <button class="tool sbx" data-sbx="pop-up" title="Grow population by 10%">Population +</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ======= RIGHT SIDEBAR ======= -->
+  <aside id="sidebar">
+    <section class="panel" id="objectivesPanel">
+      <h3>🎯 Objectives</h3>
+      <ul id="objectivesList"></ul>
+    </section>
+    <section class="panel">
+      <h3>📈 Live statistics</h3>
+      <div class="stat-rows" id="liveStats"></div>
+      <canvas id="sparkCongestion" width="248" height="46"></canvas>
+      <div class="spark-label">Congestion — last 24 h</div>
+      <canvas id="sparkSpeed" width="248" height="46"></canvas>
+      <div class="spark-label">Average speed — last 24 h</div>
+    </section>
+    <section class="panel">
+      <h3>⭐ Score</h3>
+      <div id="scoreBreakdown" class="stat-rows"></div>
+    </section>
+    <section class="panel" id="tipsPanel">
+      <h3>💡 Tip</h3>
+      <div id="tipText">Welcome, engineer. Select a congested (red) road to see why it's failing.</div>
+    </section>
+  </aside>
+
+  <!-- ======= CANVAS ======= -->
+  <main id="viewport">
+    <canvas id="gameCanvas"></canvas>
+    <canvas id="minimap" width="200" height="150" title="Minimap — click to jump"></canvas>
+    <div id="notifications"></div>
+    <div id="cursorHint" class="hidden"></div>
+    <div id="toolHint" class="hidden"></div>
+  </main>
+
+  <!-- ======= BOTTOM PANEL ======= -->
+  <footer id="bottomPanel" class="hidden">
+    <div id="bpTitle">—</div>
+    <div id="bpBody"></div>
+    <div id="bpActions"></div>
+    <button id="bpClose" title="Close">✕</button>
+  </footer>
+
+  <!-- ======= MODALS ======= -->
+  <div id="modalRoot" class="hidden">
+    <div id="modalBox"></div>
+  </div>
+
+  <!-- ======= START SCREEN ======= -->
+  <div id="startScreen">
+    <div class="start-inner">
+      <h1><span class="logo-big">🚦</span> GRIDLOCK</h1>
+      <p class="tagline">You are the city's new traffic engineer. Untangle the jams.</p>
+      <div class="start-tabs">
+        <button class="start-tab active" data-tab="campaign">Campaign</button>
+        <button class="start-tab" data-tab="sandbox">Sandbox</button>
+        <button class="start-tab" data-tab="import">Real-world map</button>
+        <button class="start-tab" data-tab="load">Load game</button>
+      </div>
+      <div class="start-page" id="page-campaign"></div>
+      <div class="start-page hidden" id="page-sandbox">
+        <div class="form-row"><label>City style</label>
+          <select id="sbxStyle">
+            <option value="grid">American grid</option>
+            <option value="organic">Historic European</option>
+            <option value="suburb">Suburban town</option>
+            <option value="coastal">Coastal city</option>
+            <option value="mountain">Mountain city</option>
+          </select></div>
+        <div class="form-row"><label>Size</label>
+          <select id="sbxSize"><option value="small">Small</option><option value="medium" selected>Medium</option><option value="large">Large</option></select></div>
+        <div class="form-row"><label>Population</label>
+          <input id="sbxPop" type="range" min="2000" max="60000" value="15000" step="1000"><span id="sbxPopVal">15,000</span></div>
+        <div class="form-row"><label>Seed</label><input id="sbxSeed" type="number" value="42"></div>
+        <button class="big-btn" id="btnStartSandbox">Start sandbox</button>
+      </div>
+      <div class="start-page hidden" id="page-import">
+        <p class="import-note">Import a real road network from <b>OpenStreetMap</b> (via the Overpass API — open data, ODbL licence). Needs internet access; areas up to a few km² work best.</p>
+        <div class="form-row"><label>Search place</label><input id="impSearch" type="text" placeholder="e.g. Soho, London or Montmartre, Paris"></div>
+        <div class="form-row"><label>…or coords / maps link</label><input id="impCoords" type="text" placeholder="51.5138,-0.1360  ·  or paste a maps link with @lat,lng"></div>
+        <div class="form-row"><label>Radius</label>
+          <select id="impRadius"><option value="500">~0.8 km²</option><option value="800" selected>~2 km²</option><option value="1200">~4.5 km²</option><option value="2000">~12 km²</option></select></div>
+        <div class="form-row"><label>Population</label><input id="impPop" type="range" min="2000" max="60000" value="20000" step="1000"><span id="impPopVal">20,000</span></div>
+        <button class="big-btn" id="btnImport">Import &amp; play</button>
+        <div id="importStatus"></div>
+      </div>
+      <div class="start-page hidden" id="page-load"><div id="loadSlots"></div></div>
+      <div class="start-difficulty">
+        <label>Difficulty</label>
+        <select id="difficulty">
+          <option value="easy">Easy — generous budget, calm drivers</option>
+          <option value="normal" selected>Normal</option>
+          <option value="hard">Hard — heavy demand, tight budget</option>
+          <option value="expert">Expert — ruthless drivers, brutal demand</option>
+        </select>
+      </div>
+      <p class="start-foot">Runs fully in your browser · autosaves locally · map data © OpenStreetMap contributors when imported</p>
+    </div>
+  </div>
+
+  <div id="loadingOverlay" class="hidden"><div class="spinner"></div><div id="loadingText">Generating city…</div></div>
+</div>
+
+<script src="js/utils.js"></script>
+<script src="js/roadnet.js"></script>
+<script src="js/citygen.js"></script>
+<script src="js/osm.js"></script>
+<script src="js/transit.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/render.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
