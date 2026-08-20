@@ -1,15 +1,21 @@
 {
-  "name": "mcptests",
+  "name": "jarvis",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "JARVIS — a voice-driven assistant with an offline command core and an optional Claude link.",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node server/index.js",
+    "start": "concurrently -n bridge,web -c cyan,magenta \"npm:server\" \"npm:dev\"",
     "build": "vite build",
+    "preview": "vite preview",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.120.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -18,10 +24,12 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "concurrently": "^10.0.5",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "vitest": "^4.1.11"
   }
 }
