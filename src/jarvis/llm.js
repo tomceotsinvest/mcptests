@@ -54,9 +54,16 @@ export function createLlmClient({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) {
 
     /** Ask the bridge whether it can reach Claude. Never throws. */
     async refresh() {
+      // Opened straight off disk: there is no origin to proxy /api, and the
+      // attempt would only spray CORS errors into the console.
+      if (typeof location !== 'undefined' && location.protocol === 'file:') {
+        return setStatus({ available: false, model: null, reason: 'no bridge (opened as a local file)' })
+      }
       try {
         const response = await doFetch(`${baseUrl}/status`, { headers: { accept: 'application/json' } })
-        if (!response.ok) return setStatus({ available: false, reason: `bridge returned ${response.status}` })
+        // A 404/500 here means nothing is listening on /api — same practical
+        // situation as no bridge at all, so report it the same way.
+        if (!response.ok) return setStatus({ available: false, model: null, reason: 'bridge not running' })
         const body = await response.json()
         return setStatus({
           available: Boolean(body.llm),

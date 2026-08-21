@@ -9,6 +9,7 @@
     "server": "node server/index.js",
     "start": "concurrently -n bridge,web -c cyan,magenta \"npm:server\" \"npm:dev\"",
     "build": "vite build",
+    "build:standalone": "vite build && node scripts/build-standalone.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "test": "vitest run",

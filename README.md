@@ -22,6 +22,17 @@ npm run dev          # UI only — local core, no Claude link
 
 Open the printed URL and type or speak a command.
 
+### No-install option
+
+```bash
+npm run build:standalone      # writes dist/jarvis.html
+```
+
+That is the whole app inlined into one file — open it by double-clicking, or
+put it on any static host. It runs the local core with no server and no
+network; the Claude link needs the bridge, so the status rail reports it
+offline.
+
 To add the Claude link:
 
 ```bash
@@ -111,6 +122,7 @@ Copy `.env.example` if you prefer a file, and `source` it before `npm start`.
 | `npm test` | Vitest suite for the engine, memory and bridge helpers |
 | `npm run lint` | ESLint |
 | `npm run build` / `npm run preview` | production build and preview |
+| `npm run build:standalone` | one self-contained `dist/jarvis.html` — no server needed |
 
 ## Browser support
 
